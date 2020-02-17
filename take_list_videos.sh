@@ -13,6 +13,8 @@ selectedVideoFormat=''
 folderName=''
 selectedFolderToModify=''
 outputCompressedVideo=''
+startTime=''
+endTime=''
 # ======================================================================== #
 list_folders_in_directory(){
     for eachfile in `ls -d */`
@@ -85,13 +87,7 @@ download_files(){
         echo "Command "${DOWNLOAD_URL}""${line}""
         $DOWNLOAD_URL$line
     done < read
-    if [ "$0" == "no" ]; then
-        echo "end"
-    else
-        open $0    
-    fi
-    echo "Downloaded all the given files successfuly, please check the folder"
-    open $folderName
+    echo "Downloaded all the given files successfuly, please check the folder > "$folderName
 }
 __='
 Selected the compression type
@@ -191,6 +187,21 @@ convert_video(){
         fi
     done       
 }
+__='
+Trims the video for the given time
+'
+trim_video(){
+    echo "Enter the start time - format(HH:MM:SS) eg 00:01:00 for one minute"
+    read givenTime
+    startTime=$givenTime
+    echo "Enter the end time - format(HH:MM:SS) eg 00:02:00 for one minute"
+    read givenTime
+    endTime=$givenTime
+    echo "Enter the file name to be trimmed"
+    read inVideoFile
+    echo ""$inVideoFile" Video will be trimmed from "$startTime" to "$endTime""
+    ffmpeg -ss $startTime -i $inVideoFile -to $endTime -c copy out_cut.mp4 
+}
 # ======================================================================== #
 # ======================================================================== #
 # Selects the operation type
@@ -201,7 +212,7 @@ convert_video(){
 # 5 Convert - "mkv" "mov" "MOV" "webm" to mp4 format
 # ======================================================================== #
 echo '*********** Select Type ***********'
-options=("convert mp3 from you tube" "download video from youtube" "types" "custom" "convert" "compress")
+options=("convert mp3 from you tube" "download video from youtube" "types" "custom" "convert" "compress" "trim video")
 select opt in "${options[@]}"
 do
     case $opt in
@@ -248,6 +259,12 @@ do
             echo "you chose  $opt"
             convert_video
             type=$opt
+            break
+            ;;
+        "trim video")
+            echo "you chose  $opt"
+            type=$opt
+            trim_video
             break
             ;;
 
